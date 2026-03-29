@@ -9,9 +9,9 @@ export default function TopicLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex h-[100svh] flex-col overflow-hidden bg-slate-950 lg:h-screen lg:flex-row">
+    <div className="flex h-[100svh] flex-col overflow-hidden bg-slate-950 md:h-screen md:flex-row">
       <Sidebar nav={navTree} />
-      <main className="flex-1 min-h-0 min-w-0 overflow-hidden">
+      <main className="relative flex-1 min-h-0 min-w-0 overflow-hidden">
         {children}
       </main>
     </div>

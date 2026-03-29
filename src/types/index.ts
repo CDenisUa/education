@@ -4,6 +4,24 @@ export interface CodeExample {
   language: string
 }
 
+export interface InterviewTerm {
+  en: string
+  ru: string
+  description: string
+}
+
+export interface InterviewQuestion {
+  id: string
+  question: string
+  category: string
+  level: 'junior' | 'middle' | 'senior'
+  terms: InterviewTerm[]
+  shortAnswer: string
+  fullAnswer: string
+  visual?: string
+  examples?: CodeExample[]
+}
+
 export interface TopicSection {
   id: string
   title: string
@@ -11,6 +29,7 @@ export interface TopicSection {
   explanation: string
   examples: CodeExample[]
   demoComponent?: string
+  interviewQuestionIds?: string[]
 }
 
 export interface Topic {

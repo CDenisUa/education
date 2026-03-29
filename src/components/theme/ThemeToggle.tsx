@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from 'react'
 
 type Theme = 'light' | 'dark'
+type ThemeToggleVariant = 'floating' | 'inline' | 'icon'
 
 const STORAGE_KEY = 'education-theme'
 const DEFAULT_THEME: Theme = 'light'
@@ -74,7 +75,11 @@ function getServerHydratedSnapshot() {
   return false
 }
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  variant?: ThemeToggleVariant
+}
+
+export function ThemeToggle({ variant = 'floating' }: ThemeToggleProps) {
   const theme = useSyncExternalStore(subscribe, getThemeSnapshot, getServerThemeSnapshot)
   const hydrated = useSyncExternalStore(
     subscribeHydration,
@@ -83,6 +88,39 @@ export function ThemeToggle() {
   )
 
   const nextTheme = theme === 'light' ? 'dark' : 'light'
+  const isInline = variant === 'inline'
+  const isIcon = variant === 'icon'
+  const icon = hydrated && theme === 'dark' ? (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-5 w-5 text-amber-300"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2.5" />
+      <path d="M12 19.5V22" />
+      <path d="M4.93 4.93l1.77 1.77" />
+      <path d="M17.3 17.3l1.77 1.77" />
+      <path d="M2 12h2.5" />
+      <path d="M19.5 12H22" />
+      <path d="M4.93 19.07l1.77-1.77" />
+      <path d="M17.3 6.7l1.77-1.77" />
+    </svg>
+  ) : (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-5 w-5 text-indigo-300"
+      fill="currentColor"
+    >
+      <path d="M20.8 14.5A8.8 8.8 0 0 1 9.5 3.2a.75.75 0 0 0-.9-.95A10 10 0 1 0 21.75 15.4a.75.75 0 0 0-.95-.9Z" />
+    </svg>
+  )
 
   return (
     <button
@@ -90,10 +128,11 @@ export function ThemeToggle() {
       onClick={() => {
         applyTheme(nextTheme)
       }}
-      className="theme-toggle fixed z-50 inline-flex h-11 w-11 items-center justify-center rounded-full
-        border border-white/10 bg-slate-900/80 text-slate-300
-        shadow-lg shadow-slate-950/20 backdrop-blur-md transition-all duration-200
-        hover:border-white/20 hover:bg-slate-800/80"
+      className={isInline
+        ? 'inline-flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/4 px-4 py-3 text-left text-slate-200 transition-colors hover:border-white/20 hover:bg-white/5'
+        : isIcon
+          ? 'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-slate-900/80 text-slate-300 transition-colors hover:border-white/20 hover:bg-slate-800/80'
+        : 'theme-toggle fixed z-50 hidden h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-slate-900/80 text-slate-300 shadow-lg shadow-slate-950/20 backdrop-blur-md transition-all duration-200 hover:border-white/20 hover:bg-slate-800/80 md:inline-flex'}
       aria-label={hydrated
         ? `Переключить на ${nextTheme === 'light' ? 'светлую' : 'тёмную'} тему`
         : 'Переключение темы'}
@@ -106,36 +145,22 @@ export function ThemeToggle() {
           ? `Текущая тема: ${theme === 'light' ? 'светлая' : 'тёмная'}`
           : 'Загрузка темы'}
       </span>
-      {hydrated && theme === 'dark' ? (
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          className="h-5 w-5 text-amber-300"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2.5" />
-          <path d="M12 19.5V22" />
-          <path d="M4.93 4.93l1.77 1.77" />
-          <path d="M17.3 17.3l1.77 1.77" />
-          <path d="M2 12h2.5" />
-          <path d="M19.5 12H22" />
-          <path d="M4.93 19.07l1.77-1.77" />
-          <path d="M17.3 6.7l1.77-1.77" />
-        </svg>
+      {isInline ? (
+        <>
+          <span className="text-sm font-medium text-white">Тема оформления</span>
+          <span className="flex items-center gap-3">
+            <span className="text-xs uppercase tracking-[0.18em] text-slate-500">
+              {hydrated
+                ? theme === 'light'
+                  ? 'Светлая'
+                  : 'Тёмная'
+                : 'Загрузка'}
+            </span>
+            {icon}
+          </span>
+        </>
       ) : (
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          className="h-5 w-5 text-indigo-300"
-          fill="currentColor"
-        >
-          <path d="M20.8 14.5A8.8 8.8 0 0 1 9.5 3.2a.75.75 0 0 0-.9-.95A10 10 0 1 0 21.75 15.4a.75.75 0 0 0-.95-.9Z" />
-        </svg>
+        icon
       )}
     </button>
   )

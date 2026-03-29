@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { TopicView } from '@/components/layout/TopicView'
 // Data
 import { getTopic, getSection } from '@/data'
+import { getQuestions } from '@/data/questions'
 
 interface Props {
   params: Promise<{ topicId: string; sectionId: string }>
@@ -26,6 +27,10 @@ export default async function SectionPage({ params }: Props) {
 
   if (!topic || !section) notFound()
 
+  const interviewQuestions = section.interviewQuestionIds
+    ? getQuestions(section.interviewQuestionIds)
+    : []
+
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <TopicView
@@ -33,6 +38,7 @@ export default async function SectionPage({ params }: Props) {
         topicId={topicId}
         topicTitle={topic.title}
         topicIcon={topic.icon}
+        interviewQuestions={interviewQuestions}
       />
     </div>
   )
