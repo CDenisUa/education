@@ -1,0 +1,39 @@
+// Core
+import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
+// Components
+import { TopicView } from '@/components/layout/TopicView'
+// Data
+import { getTopic, getSection } from '@/data'
+
+interface Props {
+  params: Promise<{ topicId: string; sectionId: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { topicId, sectionId } = await params
+  const section = getSection(topicId, sectionId)
+  const topic = getTopic(topicId)
+  return {
+    title: section ? `${section.title} — ${topic?.title}` : 'Not Found',
+  }
+}
+
+export default async function SectionPage({ params }: Props) {
+  const { topicId, sectionId } = await params
+  const topic = getTopic(topicId)
+  const section = getSection(topicId, sectionId)
+
+  if (!topic || !section) notFound()
+
+  return (
+    <div className="h-full overflow-hidden flex flex-col">
+      <TopicView
+        section={section}
+        topicId={topicId}
+        topicTitle={topic.title}
+        topicIcon={topic.icon}
+      />
+    </div>
+  )
+}
