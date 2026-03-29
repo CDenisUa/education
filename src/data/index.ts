@@ -2,8 +2,13 @@
 import { htmlTopic } from './topics/html'
 import { cssTopic } from './topics/css'
 import { javascriptTopic } from './topics/javascript'
+import { typescriptTopic } from './topics/typescript'
 import { reactTopic } from './topics/react'
 import { nextjsTopic } from './topics/nextjs'
+import { patternsTopic } from './topics/patterns'
+import { algorithmsTopic } from './topics/algorithms'
+import { architectureTopic } from './topics/architecture'
+import { interviewTopic } from './topics/interview'
 // Types
 import type { Topic, NavItem } from '@/types'
 
@@ -11,8 +16,13 @@ export const topics: Topic[] = [
   htmlTopic,
   cssTopic,
   javascriptTopic,
+  typescriptTopic,
   reactTopic,
   nextjsTopic,
+  patternsTopic,
+  algorithmsTopic,
+  architectureTopic,
+  interviewTopic,
 ]
 
 export const navTree: NavItem[] = topics.map(topic => ({

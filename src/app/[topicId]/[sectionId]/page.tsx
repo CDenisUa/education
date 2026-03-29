@@ -27,7 +27,7 @@ export default async function SectionPage({ params }: Props) {
   if (!topic || !section) notFound()
 
   return (
-    <div className="h-full overflow-hidden flex flex-col">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <TopicView
         section={section}
         topicId={topicId}

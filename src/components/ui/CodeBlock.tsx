@@ -10,9 +10,16 @@ interface CodeBlockProps {
   language: string
   title?: string
   showLineNumbers?: boolean
+  className?: string
 }
 
-export function CodeBlock({ code, language, title, showLineNumbers = true }: CodeBlockProps) {
+export function CodeBlock({
+  code,
+  language,
+  title,
+  showLineNumbers = true,
+  className = '',
+}: CodeBlockProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -22,8 +29,8 @@ export function CodeBlock({ code, language, title, showLineNumbers = true }: Cod
   }
 
   return (
-    <div className="rounded-xl overflow-hidden border border-white/10 bg-[#1e1e1e]">
-      <div className="flex items-center justify-between px-4 py-2.5 bg-[#2d2d2d] border-b border-white/10">
+    <div className={`theme-code-block flex min-h-0 flex-col rounded-xl overflow-hidden border border-white/10 bg-[#1e1e1e] ${className}`}>
+      <div className="flex shrink-0 items-center justify-between px-4 py-2.5 bg-[#2d2d2d] border-b border-white/10">
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
             <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
@@ -46,24 +53,27 @@ export function CodeBlock({ code, language, title, showLineNumbers = true }: Cod
           </button>
         </div>
       </div>
-      <SyntaxHighlighter
-        language={language === 'tsx' ? 'typescript' : language}
-        style={vscDarkPlus}
-        showLineNumbers={showLineNumbers}
-        customStyle={{
-          margin: 0,
-          padding: '16px',
-          background: 'transparent',
-          fontSize: '13px',
-          lineHeight: '1.6',
-        }}
-        lineNumberStyle={{
-          color: '#4a4a6a',
-          minWidth: '2.5em',
-        }}
-      >
-        {code}
-      </SyntaxHighlighter>
+      <div className="min-h-0 flex-1 overflow-auto">
+        <SyntaxHighlighter
+          language={language === 'tsx' ? 'typescript' : language}
+          style={vscDarkPlus}
+          showLineNumbers={showLineNumbers}
+          customStyle={{
+            margin: 0,
+            padding: '16px',
+            minHeight: '100%',
+            background: 'transparent',
+            fontSize: '13px',
+            lineHeight: '1.6',
+          }}
+          lineNumberStyle={{
+            color: '#4a4a6a',
+            minWidth: '2.5em',
+          }}
+        >
+          {code}
+        </SyntaxHighlighter>
+      </div>
     </div>
   )
 }

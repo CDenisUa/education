@@ -5,31 +5,31 @@ import { topics } from '@/data'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="flex min-h-[100svh] flex-col bg-slate-950">
       {/* Hero */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-24">
-        <div className="text-center mb-16 max-w-2xl">
+      <div className="home-hero-safe flex flex-1 flex-col items-center justify-start px-4 py-18 sm:px-6 sm:justify-center sm:py-24">
+        <div className="mb-10 max-w-2xl text-center sm:mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full
             bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-            Next.js 15 · React 19 · App Router
+            Next.js 16 · React 19 · App Router
           </div>
-          <h1 className="text-5xl font-bold text-white mb-4 tracking-tight">
-            WebMechanics
+          <h1 className="mb-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+            education
           </h1>
-          <p className="text-lg text-slate-400 leading-relaxed">
-            Интерактивный справочник по веб-разработке.<br />
-            Теория, примеры кода и живые демо в одном месте.
+          <p className="text-base leading-relaxed text-slate-400 sm:text-lg">
+            <span className="block">Интерактивный справочник по веб-разработке.</span>
+            <span className="block">Теория, примеры кода и живые демо в одном месте.</span>
           </p>
         </div>
 
         {/* Topics grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 w-full max-w-5xl">
+        <div className="grid w-full max-w-6xl grid-cols-1 gap-3 min-[430px]:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5">
           {topics.map(topic => (
             <Link
               key={topic.id}
               href={`/${topic.id}/${topic.sections[0].id}`}
-              className="group p-5 rounded-xl border border-white/10 bg-slate-900/60
+              className="group rounded-2xl border border-white/10 bg-slate-900/60 p-4
                 hover:border-white/20 hover:bg-slate-800/60
                 transition-all duration-200 hover:-translate-y-1"
             >
@@ -50,7 +50,7 @@ export default function HomePage() {
         </div>
 
         {/* Stats */}
-        <div className="mt-12 flex gap-8 text-sm text-slate-600">
+        <div className="mt-8 grid w-full max-w-md grid-cols-3 gap-3 text-sm text-slate-600 sm:mt-12 sm:flex sm:w-auto sm:gap-8">
           {[
             { value: topics.reduce((n, t) => n + t.sections.length, 0), label: 'тем' },
             { value: topics.reduce((n, t) => n + t.sections.reduce((m, s) => m + s.examples.length, 0), 0), label: 'примеров кода' },
@@ -66,12 +66,12 @@ export default function HomePage() {
 
       {/* Developer credit strip */}
       <div className="bg-black/30 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-3 flex justify-end">
+        <div className="mx-auto flex max-w-7xl justify-center px-4 py-3 sm:px-6 lg:justify-end lg:px-8">
           <a href="https://chepio.tech" target="_blank" rel="noopener noreferrer"
             className="opacity-25 hover:opacity-100 transition-all duration-300"
             aria-label="Developed by Chepio">
             <img src="/images/icons/logo_designed.svg" alt="chepio.tech"
-              className="h-7 w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all duration-300" />
+              className="theme-credit-logo h-7 w-auto brightness-0 invert hover:brightness-100 hover:invert-0 transition-all duration-300" />
           </a>
         </div>
       </div>

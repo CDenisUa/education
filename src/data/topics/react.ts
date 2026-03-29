@@ -5,7 +5,7 @@ export const reactTopic: Topic = {
   id: 'react',
   title: 'React',
   icon: '⚛️',
-  description: 'Компоненты, хуки, контекст, производительность и паттерны',
+  description: 'Компоненты, хуки, reconciliation, Fiber, concurrent features и React 19 API',
   sections: [
     {
       id: 'components',
@@ -113,13 +113,155 @@ Card.Footer = function CardFooter({ children }: CardProps) {
       demoComponent: 'ComponentsDemo',
     },
     {
+      id: 'react-mental-model',
+      title: 'Как React обновляет UI',
+      description: 'State, render, commit и Virtual DOM простыми словами',
+      explanation: `React удобно понимать так: ты меняешь данные, а React сам приводит экран к нужному виду.
+
+## Главная цепочка
+- событие или \`setState\` запускают обновление
+- React снова вызывает компонент и получает **новое описание UI**
+- потом React сравнивает новый результат с прошлым
+- в браузер попадают только нужные изменения
+
+## Простая аналогия
+Сначала React рисует интерфейс **на бумаге**. Это черновик, который обычно называют Virtual DOM. Потом он сравнивает новый черновик со старым и только после этого идёт в реальный DOM.
+
+## Что важно понять
+- ре-рендер значит "компонент вызвали ещё раз", а не "весь DOM уничтожили"
+- state ведёт себя как **снимок на момент конкретного рендера**
+- render должен быть чистым: без запросов, таймеров и мутаций
+- в Strict Mode React может вызвать render дважды в dev, чтобы быстрее найти нечистую логику`,
+      examples: [
+        {
+          title: 'State как снимок',
+          language: 'tsx',
+          code: `function Counter() {
+  const [count, setCount] = useState(0)
+
+  function handleClick() {
+    console.log(count) // 0
+    setCount(count + 1)
+    console.log(count) // всё ещё 0
+  }
+
+  return (
+    <button onClick={handleClick}>
+      Счётчик: {count}
+    </button>
+  )
+}
+
+// setCount не меняет переменную count мгновенно.
+// Он просит React выполнить новый render с новым состоянием.`,
+        },
+        {
+          title: 'Render не равен полному обновлению DOM',
+          language: 'tsx',
+          code: `function Clock({ time }: { time: string }) {
+  return (
+    <>
+      <h1>{time}</h1>
+      <input placeholder="Попробуй ввести текст" />
+    </>
+  )
+}
+
+// Если time меняется каждую секунду,
+// React обновит <h1>, но не будет заново создавать <input>,
+// потому что элемент остался на том же месте в дереве.`,
+        },
+      ],
+    },
+    {
+      id: 'reconciliation-and-keys',
+      title: 'Reconciliation и key',
+      description: 'Как React сравнивает деревья и почему key это не формальность',
+      explanation: `Полное сравнение двух деревьев UI было бы слишком дорогим, поэтому React использует **эвристики** и работает быстро в большинстве обычных случаев.
+
+## Главные правила сравнения
+- если у элемента поменялся **type**, React сносит старое поддерево и создаёт новое
+- если type тот же, React обновляет props и пытается сохранить состояние
+- списки без \`key\` React сравнивает **по позиции**
+- списки с \`key\` React сравнивает **по личности элемента**
+
+## Как думать о key
+\`key\` — это паспорт элемента. Он нужен не "для React вообще", а чтобы React понял: это тот же объект или уже другой.
+
+## Практический вывод
+- \`key={index}\` опасен, если список можно вставлять, удалять или сортировать
+- стабильный \`key\` должен приходить из данных: \`id\`, \`slug\`, \`email\`
+- смена \`key\` — это законный способ **сбросить state** компонента`,
+      examples: [
+        {
+          title: 'Плохой и хороший key',
+          language: 'tsx',
+          code: `type Todo = {
+  id: string
+  text: string
+}
+
+function BadList({ todos }: { todos: Todo[] }) {
+  return (
+    <ul>
+      {todos.map((todo, index) => (
+        <li key={index}>{todo.text}</li>
+      ))}
+    </ul>
+  )
+}
+
+function GoodList({ todos }: { todos: Todo[] }) {
+  return (
+    <ul>
+      {todos.map(todo => (
+        <li key={todo.id}>{todo.text}</li>
+      ))}
+    </ul>
+  )
+}
+
+// Если вставить новый элемент в начало,
+// index-key может "перепутать" состояние строк списка.
+// key={todo.id} сохраняет правильную связь между данными и UI.`,
+        },
+        {
+          title: 'key как сброс состояния',
+          language: 'tsx',
+          code: `function ProfilePage({ userId }: { userId: string }) {
+  return <ProfileForm key={userId} userId={userId} />
+}
+
+function ProfileForm({ userId }: { userId: string }) {
+  const [comment, setComment] = useState('')
+
+  return (
+    <>
+      <h2>Профиль: {userId}</h2>
+      <textarea
+        value={comment}
+        onChange={e => setComment(e.target.value)}
+      />
+    </>
+  )
+}
+
+// Когда userId меняется, меняется и key.
+// React размонтирует старую форму и смонтирует новую,
+// поэтому локальный state сбросится автоматически.`,
+        },
+      ],
+    },
+    {
       id: 'use-state',
       title: 'useState',
       description: 'Локальное состояние компонента',
-      explanation: `\`useState\` добавляет локальное состояние к функциональному компоненту.
+      explanation: `\`useState\` даёт компоненту **память** между рендерами.
 
 **Ключевые факты:**
+- state — это **снимок** на момент текущего рендера
 - Возвращает \`[value, setter]\`
+- setter имеет **стабильную ссылку** между рендерами
 - Setter может принимать **новое значение** или **функцию обновления**
 - Функция обновления — когда новое состояние зависит от предыдущего
 - Обновление асинхронно — setState не меняет значение сразу
@@ -210,7 +352,13 @@ function SearchList() {
 - \`[a, b]\` — при изменении \`a\` или \`b\`
 - Без массива — при каждом рендере (редко нужно)
 
-**Cleanup функция** — возвращается из effect, вызывается при размонтировании или перед следующим запуском.`,
+**Timing:**
+- \`useEffect\` запускается **после paint**
+- \`useLayoutEffect\` запускается **до paint** и нужен редко: обычно для измерения DOM без визуального "скачка"
+
+**Cleanup функция** — возвращается из effect, вызывается при размонтировании или перед следующим запуском.
+
+Если внутри effect нужно читать **последние props/state**, но не хочется заново переподписывать effect, в React 19 для этого есть \`useEffectEvent\`.`,
       examples: [
         {
           title: 'Правильные use cases',
@@ -287,6 +435,176 @@ useEffect(() => {
       demoComponent: 'UseEffectDemo',
     },
     {
+      id: 'fiber-and-phases',
+      title: 'Fiber tree и фазы рендера',
+      description: 'current tree, workInProgress, Render Phase и Commit Phase',
+      explanation: `Fiber — это внутренняя структура React, где **каждый компонент представлен отдельным узлом**.
+
+## Простая картинка в голове
+Представь, что React ведёт работу не прямо на экране, а на карточках задачи. Для каждого компонента есть Fiber-узел: там React хранит тип компонента, hooks, pending-обновления и служебные флаги.
+
+## Double buffering
+React держит два дерева:
+- **current** — то, что уже показано пользователю
+- **workInProgress** — дерево, которое React сейчас собирает в фоне
+
+Когда работа готова, React атомарно переключает корень: новое дерево становится текущим. Поэтому пользователь не видит "половину обновления".
+
+## Фазы
+- **Trigger** — что-то вызвало обновление: событие, setState, context
+- **Render Phase** — React считает новый UI; эту фазу можно прервать и пересчитать
+- **Commit Phase** — React меняет DOM и запускает layout/effect-логику; эта фаза короткая и синхронная
+
+## Почему хуки нельзя вызывать в условиях
+React ориентируется на **порядок вызовов hooks** внутри Fiber-узла. Если порядок между рендерами меняется, React начинает читать не те данные.
+
+## Senior-словарь
+У Fiber-узла часто обсуждают поля \`type\`, \`stateNode\`, \`memoizedState\`, \`alternate\`, \`lanes\` и \`flags\`. Не нужно помнить все детали, но полезно понимать их смысл.`,
+      examples: [
+        {
+          title: 'current и workInProgress',
+          language: 'text',
+          code: `current tree
+Root
+└── ProductPage
+    └── Reviews
+
+workInProgress tree
+Root
+└── ProductPage
+    └── Reviews
+        alternate -> ссылка на текущий Reviews fiber
+
+Что происходит:
+1. Пользователь нажал кнопку
+2. React начал строить workInProgress
+3. Если всё готово, происходит commit
+4. workInProgress становится новым current tree`,
+        },
+        {
+          title: 'Почему hooks нельзя вызывать условно',
+          language: 'tsx',
+          code: `function BadComponent({ isOpen }: { isOpen: boolean }) {
+  const [count] = useState(0)
+
+  if (isOpen) {
+    useEffect(() => {
+      console.log('Открыто')
+    }, [])
+  }
+
+  const [name] = useState('Ada')
+  return <div>{count} {name}</div>
+}
+
+// При isOpen=false второй hook — это useState(name)
+// При isOpen=true второй hook — это useEffect
+// Порядок сломался, React "съезжает" по списку hooks.
+
+function GoodComponent({ isOpen }: { isOpen: boolean }) {
+  const [count] = useState(0)
+  const [name] = useState('Ada')
+
+  useEffect(() => {
+    if (isOpen) {
+      console.log('Открыто')
+    }
+  }, [isOpen])
+
+  return <div>{count} {name}</div>
+}`,
+        },
+      ],
+    },
+    {
+      id: 'concurrent-react',
+      title: 'Concurrent React',
+      description: 'Scheduler, Lanes, startTransition, useTransition и useDeferredValue',
+      explanation: `Современный React умеет различать **срочную** и **несрочную** работу.
+
+## Как думать о приоритетах
+- ввод в поле, клик, фокус — срочно
+- тяжёлая фильтрация, сортировка, графики — можно сделать в фоне
+
+Внутри React этим управляет Scheduler. Он раскладывает обновления по **Lanes**. Проще всего представить lanes как несколько дорожек с разным приоритетом.
+
+## Главные API
+- \`startTransition\` — помечает обновление как несрочное
+- \`useTransition\` — делает то же самое, но ещё даёт \`isPending\`
+- \`useDeferredValue\` — откладывает обновление конкретного значения для медленного поддерева
+
+## Практический смысл
+- input должен печататься сразу
+- список результатов может обновиться чуть позже
+- долгий render можно прервать более срочным действием пользователя
+
+## Важные caveats
+- transitions не подходят для **контролируемого значения input**
+- \`startTransition\` помечает только синхронно запланированные обновления
+- \`useDeferredValue\` не отменяет сетевые запросы сам по себе`,
+      examples: [
+        {
+          title: 'useTransition для тяжёлого списка',
+          language: 'tsx',
+          code: `function SearchPage({ allItems }: { allItems: string[] }) {
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState('')
+  const [isPending, startTransition] = useTransition()
+
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const next = event.target.value
+
+    setQuery(next) // срочное обновление
+
+    startTransition(() => {
+      setFilter(next) // несрочное обновление
+    })
+  }
+
+  const visibleItems = allItems.filter(item =>
+    item.toLowerCase().includes(filter.toLowerCase())
+  )
+
+  return (
+    <>
+      <input value={query} onChange={handleChange} />
+      {isPending && <p>Обновляем список...</p>}
+      <ResultsList items={visibleItems} />
+    </>
+  )
+}`,
+        },
+        {
+          title: 'useDeferredValue для медленного поддерева',
+          language: 'tsx',
+          code: `function SearchScreen({ products }: { products: Product[] }) {
+  const [query, setQuery] = useState('')
+  const deferredQuery = useDeferredValue(query)
+
+  const filteredProducts = useMemo(() => {
+    return products.filter(product =>
+      product.title.toLowerCase().includes(deferredQuery.toLowerCase())
+    )
+  }, [products, deferredQuery])
+
+  return (
+    <>
+      <input
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        placeholder="Поиск..."
+      />
+
+      {query !== deferredQuery && <p>Показываем старый список, новый уже считается...</p>}
+
+      <SlowProductGrid items={filteredProducts} />
+    </>
+  )
+}`,
+        },
+      ],
+    },
+    {
       id: 'use-memo-callback',
       title: 'useMemo и useCallback',
       description: 'Мемоизация вычислений и функций',
@@ -299,6 +617,10 @@ useEffect(() => {
 **useCallback** — кэширует **функцию**:
 - Нужен когда функция передаётся в \`React.memo\` компонент
 - Или является зависимостью useEffect
+
+**Что важно в современном React:**
+- если в проекте включён React Compiler, часть ручной мемоизации может стать не нужна
+- \`React.memo\` бесполезен, если ты всё равно передаёшь новые объекты и функции каждый render
 
 **Правило:** Не добавляй мемоизацию преждевременно. Сначала измерь производительность.`,
       examples: [
@@ -368,7 +690,9 @@ function Parent() {
 - \`useRef\` — изменение не перерисовывает компонент
 - \`useState\` — изменение вызывает ре-рендер
 
-**Паттерн "latest ref"** — сохранение последней версии callback без зависимостей в useEffect.`,
+**Паттерн "latest ref"** — сохранение последней версии callback без зависимостей в useEffect.
+
+В современном коде для части таких сценариев удобнее \`useEffectEvent\`, если задача именно в effect-логике, а не в хранении произвольного значения.`,
       examples: [
         {
           title: 'Доступ к DOM',
@@ -406,7 +730,7 @@ function Parent() {
           language: 'tsx',
           code: `function StopWatch() {
   const [time, setTime] = useState(0)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const start = () => {
     if (intervalRef.current) return
@@ -456,7 +780,12 @@ function useLatest<T>(value: T) {
 **Структура:**
 - **State** — текущее состояние
 - **Action** — описание что произошло (\`{ type, payload }\`)
-- **Reducer** — чистая функция \`(state, action) => newState\``,
+- **Reducer** — чистая функция \`(state, action) => newState\`
+
+**Важно:**
+- \`dispatch\` имеет стабильную ссылку между рендерами
+- \`useReducer\` хорошо ложится на state machine и сложные переходы
+- это не глобальный store, а просто другой способ локально управлять состоянием`,
       examples: [
         {
           title: 'Todo List с useReducer',
@@ -534,6 +863,8 @@ function TodoApp() {
       description: 'Передача данных через дерево без prop drilling',
       explanation: `Context позволяет передавать данные глубоко в дерево компонентов без props.
 
+Контекст удобно понимать как **широковещательный канал**: когда значение provider меняется, React сообщает об этом всем потребителям ниже по дереву.
+
 **Когда использовать:**
 - Тема (dark/light)
 - Текущий пользователь
@@ -544,7 +875,11 @@ function TodoApp() {
 - Для состояния, которое меняется часто — все потребители перерисуются
 - Можно решить поднятием состояния или composition
 
-**Оптимизация:** разделяй контексты на быстро/редко меняющиеся части.`,
+**Оптимизация:** разделяй контексты на быстро/редко меняющиеся части.
+
+В React 19 ты можешь встретить две записи provider:
+- старая: \`<ThemeContext.Provider value={value}>\`
+- новая: \`<ThemeContext value={value}>\``,
       examples: [
         {
           title: 'Полный паттерн Context',
@@ -570,9 +905,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   )
 
   return (
-    <ThemeContext.Provider value={value}>
+    <ThemeContext value={value}>
       {children}
-    </ThemeContext.Provider>
+    </ThemeContext>
   )
 }
 
@@ -599,6 +934,235 @@ function Header() {
         },
       ],
       demoComponent: 'ContextDemo',
+    },
+    {
+      id: 'react-19-hooks',
+      title: 'Новые API React 19',
+      description: 'useEffectEvent, useOptimistic, useActionState и use',
+      explanation: `React 19 добавил несколько API, которые закрывают частые боли в асинхронном UI.
+
+## Что дают новые хуки
+- \`useEffectEvent\` — читать **свежие props/state** внутри effect без лишних переподписок
+- \`useOptimistic\` — мгновенно показать результат до ответа сервера
+- \`useActionState\` — получить result, action и \`isPending\` для async-операции
+- \`use\` — читать Promise или Context и работать вместе с Suspense
+
+## Как думать о них проще
+- \`useEffectEvent\`: "подписка остаётся той же, но callback всегда видит новые значения"
+- \`useOptimistic\`: "сначала делаем UI счастливым, потом подтверждаем результат"
+- \`useActionState\`: "форма или action сами хранят pending и последний результат"
+- \`use\`: "компонент может подождать ресурс прямо во время render"
+
+## Практический вывод
+- эти API не заменяют базовые hooks, а закрывают неудобные сценарии вокруг effects и async
+- особенно полезны в формах, optimistic UI и Suspense-потоках`,
+      examples: [
+        {
+          title: 'useEffectEvent вместо stale closure в effect',
+          language: 'tsx',
+          code: `import { useEffect, useEffectEvent } from 'react'
+
+function ChatRoom({
+  roomId,
+  theme,
+}: {
+  roomId: string
+  theme: 'light' | 'dark'
+}) {
+  const onConnected = useEffectEvent(() => {
+    showNotification('Подключено', theme)
+  })
+
+  useEffect(() => {
+    const connection = createConnection(roomId)
+    connection.connect()
+    connection.on('connected', () => {
+      onConnected()
+    })
+
+    return () => connection.disconnect()
+  }, [roomId]) // theme не заставляет переподключаться
+
+  return <p>Комната: {roomId}</p>
+}`,
+        },
+        {
+          title: 'useOptimistic и useActionState',
+          language: 'tsx',
+          code: `import { useActionState, useOptimistic } from 'react'
+
+type Comment = {
+  id: string
+  text: string
+  sending?: boolean
+}
+
+async function sendComment(
+  previousState: string | null,
+  formData: FormData,
+) {
+  const message = String(formData.get('message') ?? '')
+
+  try {
+    await api.comments.create({ message })
+    return null
+  } catch {
+    return 'Не удалось отправить комментарий'
+  }
+}
+
+function Comments({ initialComments }: { initialComments: Comment[] }) {
+  const [comments, addOptimisticComment] = useOptimistic(
+    initialComments,
+    (state, newComment: string) => [
+      ...state,
+      {
+        id: crypto.randomUUID(),
+        text: newComment,
+        sending: true,
+      },
+    ]
+  )
+
+  const [error, submitAction, isPending] = useActionState(sendComment, null)
+
+  function formAction(formData: FormData) {
+    const message = String(formData.get('message') ?? '')
+    addOptimisticComment(message)
+    submitAction(formData)
+  }
+
+  return (
+    <>
+      <form action={formAction}>
+        <input name="message" />
+        <button disabled={isPending}>Отправить</button>
+      </form>
+
+      {error && <p>{error}</p>}
+
+      <ul>
+        {comments.map(comment => (
+          <li key={comment.id}>
+            {comment.text}
+            {comment.sending && ' (Отправляем...)'}
+          </li>
+        ))}
+      </ul>
+    </>
+  )
+}`,
+        },
+        {
+          title: 'use с Suspense',
+          language: 'tsx',
+          code: `import { Suspense, use } from 'react'
+
+function ProductPage({
+  productPromise,
+}: {
+  productPromise: Promise<{ name: string; price: number }>
+}) {
+  return (
+    <Suspense fallback={<p>Загружаем товар...</p>}>
+      <ProductDetails productPromise={productPromise} />
+    </Suspense>
+  )
+}
+
+function ProductDetails({
+  productPromise,
+}: {
+  productPromise: Promise<{ name: string; price: number }>
+}) {
+  const product = use(productPromise)
+
+  return (
+    <article>
+      <h1>{product.name}</h1>
+      <p>{product.price} €</p>
+    </article>
+  )
+}`,
+        },
+      ],
+    },
+    {
+      id: 'senior-patterns',
+      title: 'Senior Patterns',
+      description: 'stale closure, useLayoutEffect, memo traps, Context splitting и key-reset',
+      explanation: `На уровне Senior уже ждут не просто знание API, а понимание **почему оно работает именно так** и где ломаются наивные решения.
+
+## Что обычно спрашивают
+- почему stale closure появляется в таймерах и подписках
+- чем \`useEffect\` отличается от \`useLayoutEffect\` относительно paint
+- почему \`React.memo\` не спасает от нестабильных props
+- почему один большой Context быстро становится узким местом
+- как \`key\` помогает не только в списках, но и для сброса state
+
+## Полезные ориентиры
+- stale closure лечится через функциональный setState, зависимости, ref или \`useEffectEvent\`
+- \`useLayoutEffect\` нужен редко, в основном для измерения DOM до paint
+- и \`setState\`, и \`dispatch\` из \`useReducer\` имеют стабильную ссылку
+- Context лучше делить на "данные" и "действия", если обновления частые
+- \`React.memo\` помогает только когда props действительно стабильны`,
+      examples: [
+        {
+          title: 'useEffect vs useLayoutEffect',
+          language: 'tsx',
+          code: `function Tooltip() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState(0)
+
+  useLayoutEffect(() => {
+    const nextHeight = ref.current?.getBoundingClientRect().height ?? 0
+    setHeight(nextHeight)
+  }, [])
+
+  return (
+    <div ref={ref} style={{ marginTop: -height / 2 }}>
+      Подсказка
+    </div>
+  )
+}
+
+// useLayoutEffect полезен, когда нужно измерить DOM
+// до того, как браузер покажет кадр пользователю.`,
+        },
+        {
+          title: 'React.memo и split context',
+          language: 'tsx',
+          code: `const UserCard = React.memo(function UserCard({
+  className,
+  onOpen,
+}: {
+  className: string
+  onOpen: () => void
+}) {
+  return <button className={className} onClick={onOpen}>Открыть</button>
+})
+
+function BadParent() {
+  const [theme, setTheme] = useState('dark')
+
+  return (
+    <UserCard
+      className={theme === 'dark' ? 'text-white' : 'text-black'}
+      onOpen={() => console.log('open')}
+    />
+  )
+}
+
+// React.memo не спасает:
+// onOpen создаётся заново на каждом render.
+
+const ThemeValueContext = createContext<'light' | 'dark'>('dark')
+const ThemeActionsContext = createContext<{ toggle(): void } | null>(null)
+
+// split context нужен, чтобы компоненты,
+// которым нужны только actions, не зависели от theme value.`,
+        },
+      ],
     },
     {
       id: 'custom-hooks',

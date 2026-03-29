@@ -1,0 +1,46 @@
+<svg width="960" height="320" viewBox="0 0 960 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="320" rx="24" fill="#020617"/>
+  <rect x="24" y="24" width="912" height="272" rx="20" fill="#0F172A" stroke="#1E293B"/>
+  <defs>
+    <linearGradient id="fluxCard" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10V0Z" fill="#38BDF8"/>
+    </marker>
+  </defs>
+
+  <text x="48" y="60" fill="#E2E8F0" font-size="28" font-family="Arial, sans-serif" font-weight="700">
+    Flux / Unidirectional Data Flow
+  </text>
+  <text x="48" y="88" fill="#94A3B8" font-size="15" font-family="Arial, sans-serif">
+    UI emits actions, state changes in one place, view re-renders from new state.
+  </text>
+
+  <rect x="60" y="132" width="160" height="92" rx="18" fill="url(#fluxCard)" stroke="#334155"/>
+  <text x="106" y="170" fill="#F8FAFC" font-size="22" font-family="Arial, sans-serif" font-weight="700">View / UI</text>
+  <text x="84" y="196" fill="#94A3B8" font-size="14" font-family="Arial, sans-serif">buttons, inputs, screens</text>
+
+  <rect x="280" y="132" width="160" height="92" rx="18" fill="url(#fluxCard)" stroke="#334155"/>
+  <text x="329" y="170" fill="#F8FAFC" font-size="22" font-family="Arial, sans-serif" font-weight="700">Action</text>
+  <text x="316" y="196" fill="#94A3B8" font-size="14" font-family="Arial, sans-serif">event intent payload</text>
+
+  <rect x="500" y="132" width="190" height="92" rx="18" fill="url(#fluxCard)" stroke="#334155"/>
+  <text x="532" y="170" fill="#F8FAFC" font-size="22" font-family="Arial, sans-serif" font-weight="700">Store / Reducer</text>
+  <text x="533" y="196" fill="#94A3B8" font-size="14" font-family="Arial, sans-serif">single state transition</text>
+
+  <rect x="750" y="132" width="150" height="92" rx="18" fill="url(#fluxCard)" stroke="#334155"/>
+  <text x="779" y="170" fill="#F8FAFC" font-size="22" font-family="Arial, sans-serif" font-weight="700">Selector</text>
+  <text x="787" y="196" fill="#94A3B8" font-size="14" font-family="Arial, sans-serif">derived data</text>
+
+  <path d="M220 178H280" stroke="#38BDF8" stroke-width="4" marker-end="url(#arrow)"/>
+  <path d="M440 178H500" stroke="#38BDF8" stroke-width="4" marker-end="url(#arrow)"/>
+  <path d="M690 178H750" stroke="#38BDF8" stroke-width="4" marker-end="url(#arrow)"/>
+  <path d="M825 232V258H140V224" stroke="#38BDF8" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <text x="364" y="122" fill="#38BDF8" font-size="13" font-family="Arial, sans-serif">dispatch</text>
+  <text x="584" y="122" fill="#38BDF8" font-size="13" font-family="Arial, sans-serif">update state</text>
+  <text x="803" y="122" fill="#38BDF8" font-size="13" font-family="Arial, sans-serif">read state</text>
+  <text x="390" y="280" fill="#38BDF8" font-size="13" font-family="Arial, sans-serif">render from state snapshot</text>
+</svg>

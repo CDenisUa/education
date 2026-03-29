@@ -1,0 +1,5 @@
+<svg width="180" height="36" viewBox="0 0 180 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="36" height="36" rx="10" fill="#0F172A"/>
+  <path d="M11 11H18.5C22.6421 11 26 14.3579 26 18.5C26 22.6421 22.6421 26 18.5 26H11V11ZM15 15V22H18.5C20.433 22 22 20.433 22 18.5C22 16.567 20.433 15 18.5 15H15Z" fill="#E2E8F0"/>
+  <text x="48" y="23" fill="#E2E8F0" font-size="16" font-family="Arial, sans-serif" font-weight="700">chepio.tech</text>
+</svg>

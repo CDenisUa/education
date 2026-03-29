@@ -28,4 +28,14 @@ export interface NavItem {
   children?: NavItem[]
 }
 
-export type SectionId = 'html' | 'css' | 'javascript' | 'react' | 'nextjs'
+export type SectionId =
+  | 'html'
+  | 'css'
+  | 'javascript'
+  | 'typescript'
+  | 'react'
+  | 'nextjs'
+  | 'patterns'
+  | 'algorithms'
+  | 'architecture'
+  | 'interview'
